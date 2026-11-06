@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy 21st Birthday Sarah! 💖</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Sacramento&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #4c1d95, #831843, #31103f);
+            color: #fff;
+        }
+        .font-playfair {
+            font-family: 'Playfair Display', serif;
+        }
+        .font-script {
+            font-family: 'Sacramento', cursive;
+        }
+        /* No scrollbar anywhere */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        * {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Floating background hearts animation */
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+            50% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
+        .bg-heart {
+            position: absolute;
+            bottom: -20px;
+            animation: floatUp linear infinite;
+            pointer-events: none;
+        }
+        /* Envelope 3D Styles */
+        .envelope-container {
+            perspective: 1000px;
+        }
+        .envelope {
+            position: relative;
+            width: 280px;
+            height: 180px;
+            background: #db2777;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: transform 0.6s ease;
+        }
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 140px solid transparent;
+            border-right: 140px solid transparent;
+            border-top: 100px solid #be185d;
+            transform-origin: top;
+            transition: transform 0.6s ease 0.2s;
+            z-index: 3;
+        }
+        .envelope.open .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+        .letter {
+            position: absolute;
+            bottom: 10px;
+            left: 15px;
+            width: 250px;
+            height: 150px;
+            background: #fff;
+            color: #1f2937;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.8s ease 0.6s;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .envelope.open .letter {
+            transform: translateY(-110px);
+            z-index: 4;
+        }
+        /* Polaroid Stack */
+        .polaroid-card {
+            position: absolute;
+            width: 260px;
+            height: 350px;
+            background: white;
+            color: #1f2937;
+            padding: 15px 15px 40px 15px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            touch-action: none;
+            cursor: pointer;
+        }
+        /* Candle flame animation */
+        @keyframes flicker {
+            0%, 100% { transform: scale(1) rotate(-2deg); opacity: 0.9; }
+            50% { transform: scale(1.1) rotate(2deg); opacity: 1; filter: drop-shadow(0 0 10px #fbbf24); }
+        }
+        .flame {
+            animation: flicker 0.6s infinite alternate;
+            transform-origin: bottom center;
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between items-center h-full w-full overflow-hidden select-none relative">
+
+    <!-- Background Floating Hearts -->
+    <div id="bg-hearts" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
+
+    <!-- START OVERLAY MODAL -->
+    <div id="start-modal" class="absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
+        <div class="bg-gradient-to-br from-pink-600/30 to-purple-600/30 border border-pink-400/40 p-8 rounded-3xl shadow-2xl max-w-sm w-full backdrop-blur-xl flex flex-col items-center">
+            <div class="text-5xl mb-4 animate-bounce">🎂</div>
+            <h1 class="font-playfair text-3xl font-extrabold text-pink-200 mb-2">Happy 21st Birthday Sarah!</h1>
+            <p class="text-pink-100 text-sm mb-6 leading-relaxed">We've crafted a magical birthday card just for you. Tap below to begin!</p>
+            <button id="start-btn" class="w-full py-4 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold rounded-2xl shadow-lg shadow-pink-600/40 transform active:scale-95 transition-all text-lg flex items-center justify-center gap-2">
+                <span>✨ Open Magic Card</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="w-full max-w-md px-4 py-3 flex justify-between items-center z-10 bg-black/20 backdrop-blur-md border-b border-white/10">
+        <div class="flex items-center gap-2">
+            <span class="animate-pulse">💖</span>
+            <span class="font-playfair text-sm font-bold tracking-wider text-pink-200">TO: SARAH ✨ (21)</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <div id="mic-status" class="text-xs px-2.5 py-1 rounded-full bg-purple-900/60 border border-purple-400/30 text-purple-200 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Mic Ready</span>
+            </div>
+            <button id="audio-toggle" class="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-pink-200 active:scale-90 transition-transform">
+                🔊
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="w-full max-w-md flex-1 flex flex-col items-center justify-center relative z-10 p-4 overflow-hidden">
+
+        <!-- STAGE 1: CAKE & BLOW -->
+        <div id="stage-1" class="stage w-full h-full flex flex-col items-center justify-center text-center">
+            <h2 class="font-playfair text-2xl font-bold text-pink-200 mb-1">Make a Wish, Sarah!</h2>
+            <p class="text-xs text-pink-300/80 mb-6">Blow into your microphone or tap the cake to blow out all 5 candles!</p>
+            
+            <div id="cake-container" class="relative cursor-pointer py-6 px-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl shadow-xl w-full flex flex-col items-center">
+                <!-- Candles -->
+                <div class="flex justify-center gap-6 mb-2">
+                    <div class="candle flex flex-col items-center relative">
+                        <div class="flame w-4 h-6 bg-gradient-to-t from-orange-500 to-yellow-300 rounded-full -top-6 absolute shadow-[0_0_12px_#fbbf24]"></div>
+                        <div class="w-2 h-8 bg-pink-300 rounded-t-sm"></div>
+                    </div>
+                    <div class="candle flex flex-col items-center relative">
+                        <div class="flame w-4 h-6 bg-gradient-to-t from-orange-500 to-yellow-300 rounded-full -top-6 absolute shadow-[0_0_12px_#fbbf24]"></div>
+                        <div class="w-2 h-8 bg-blue-300 rounded-t-sm"></div>
+                    </div>
+                    <div class="candle flex flex-col items-center relative">
+                        <div class="flame w-4 h-6 bg-gradient-to-t from-orange-500 to-yellow-300 rounded-full -top-6 absolute shadow-[0_0_12px_#fbbf24]"></div>
+                        <div class="w-2 h-8 bg-yellow-300 rounded-t-sm"></div>
+                    </div>
+                    <div class="candle flex flex-col items-center relative">
+                        <div class="flame w-4 h-6 bg-gradient-to-t from-orange-500 to-yellow-300 rounded-full -top-6 absolute shadow-[0_0_12px_#fbbf24]"></div>
+                        <div class="w-2 h-8 bg-green-300 rounded-t-sm"></div>
+                    </div>
+                    <div class="candle flex flex-col items-center relative">
+                        <div class="flame w-4 h-6 bg-gradient-to-t from-orange-500 to-yellow-300 rounded-full -top-6 absolute shadow-[0_0_12px_#fbbf24]"></div>
+                        <div class="w-2 h-8 bg-purple-300 rounded-t-sm"></div>
+                    </div>
+                </div>
+
+                <!-- 3-Tier Cake Artwork -->
+                <div class="w-56 flex flex-col items-center">
+                    <div class="w-32 h-10 bg-gradient-to-r from-pink-400 to-rose-500 rounded-t-xl border-b-2 border-white/30 shadow-md"></div>
+                    <div class="w-44 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-t-xl border-b-2 border-white/30 shadow-md"></div>
+                    <div class="w-56 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-t-2xl shadow-xl flex items-center justify-center">
+                        <span class="font-playfair text-white/90 text-sm font-bold tracking-widest">SARAH - 21</span>
+                    </div>
+                </div>
+            </div>
+            <div id="candle-count" class="mt-4 text-sm font-semibold text-pink-200">Candles remaining: 5/5</div>
+        </div>
+
+        <!-- STAGE 2: ENVELOPE -->
+        <div id="stage-2" class="stage w-full h-full hidden flex flex-col items-center justify-center text-center">
+            <h2 class="font-playfair text-2xl font-bold text-pink-200 mb-2">A Special Letter for You</h2>
+            <p class="text-xs text-pink-300/80 mb-8">Tap the envelope below to open and read your message!</p>
+            
+            <div class="envelope-container flex items-center justify-center my-6">
+                <div id="envelope" class="envelope">
+                    <div class="envelope-flap"></div>
+                    <div class="letter">
+                        <h3 class="font-playfair font-bold text-pink-600 text-sm mb-1">Dearest Sarah,</h3>
+                        <p class="text-[10px] text-gray-700 leading-tight">Wishing you a wonderful 21st birthday filled with endless joy, love, and success in everything you do. May this year bring your biggest dreams to life!</p>
+                        <span class="font-script text-[14px] text-pink-500 font-bold mt-2">- With love from family & friends -</span>
+                    </div>
+                </div>
+            </div>
+            <button id="next-stage-2" class="hidden mt-6 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold rounded-xl shadow-lg shadow-pink-600/30 text-sm">
+                View Memory Lane ➔
+            </button>
+        </div>
+
+        <!-- STAGE 3: MEMORY LANE (POLAROID STACK) -->
+        <div id="stage-3" class="stage w-full h-full hidden flex flex-col items-center justify-center text-center">
+            <h2 class="font-playfair text-2xl font-bold text-pink-200 mb-1">Sarah's Memory Lane</h2>
+            <p class="text-xs text-pink-300/80 mb-3">Swipe or tap the photo to move to the next memory</p>
+            
+            <div id="polaroid-stack" class="relative w-full h-[380px] flex items-center justify-center">
+                <!-- Dynamically populated via JS -->
+            </div>
+            <div id="polaroid-counter" class="mt-2 text-xs text-pink-300">Photo 1 / 8</div>
+        </div>
+
+        <!-- STAGE 4: SCRATCH CARD -->
+        <div id="stage-4" class="stage w-full h-full hidden flex flex-col items-center justify-center text-center">
+            <h2 class="font-playfair text-2xl font-bold text-pink-200 mb-1">Golden Birthday Wish</h2>
+            <p class="text-xs text-pink-300/80 mb-4">Rub off the gold foil below to reveal your secret wish!</p>
+            
+            <div class="relative w-72 h-64 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl flex flex-col items-center justify-center p-4 overflow-hidden">
+                <!-- Hidden Wish Content -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-0">
+                    <span class="text-3xl mb-2">🌟</span>
+                    <h3 class="font-playfair text-lg font-bold text-pink-200 mb-1">May All Your Dreams Shine!</h3>
+                    <p class="text-xs text-pink-100/90 leading-relaxed">Here's to stepping into your 21st year with boundless confidence, grace, and happiness!</p>
+                </div>
+                <!-- Scratch Canvas Layer -->
+                <canvas id="scratch-canvas" class="absolute inset-0 z-10 cursor-pointer rounded-2xl touch-none" width="288" height="256"></canvas>
+            </div>
+            <div id="scratch-progress" class="mt-4 text-xs font-semibold text-pink-200">Cleared: 0%</div>
+        </div>
+
+        <!-- STAGE 5: WISH & CONFETTI -->
+        <div id="stage-5" class="stage w-full h-full hidden flex flex-col items-center justify-center text-center">
+            <div class="bg-white/10 backdrop-blur-xl border border-pink-400/30 p-6 rounded-3xl shadow-2xl w-full max-w-sm flex flex-col items-center relative overflow-hidden">
+                <div class="text-4xl mb-3 animate-bounce">🎉</div>
+                <h2 class="font-playfair text-2xl font-extrabold text-pink-200 mb-2">Happy 21st Birthday Sarah!</h2>
+                <div class="w-12 h-0.5 bg-pink-400/50 mb-3"></div>
+                <p class="font-playfair text-xs text-pink-100/90 leading-relaxed mb-6">
+                    Wishing you an unforgettable 21st birthday and a magnificent year ahead filled with love, laughter, and wonderful adventures! 💖
+                </p>
+                <button id="confetti-btn" class="w-full py-3.5 bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:opacity-90 text-white font-bold rounded-2xl shadow-lg shadow-pink-600/40 transform active:scale-95 transition-all text-sm flex items-center justify-center gap-2">
+                    <span>✨ More Confetti Magic!</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER STEP INDICATOR -->
+    <footer class="w-full max-w-md p-4 flex justify-center items-center gap-2 z-10">
+        <div class="dot w-2 h-2 rounded-full bg-pink-400 transition-all duration-300"></div>
+        <div class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></div>
+        <div class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></div>
+        <div class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></div>
+        <div class="dot w-2 h-2 rounded-full bg-white/30 transition-all duration-300"></div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- BACKGROUND HEARTS ---
+        const bgHeartsContainer = document.getElementById('bg-hearts');
+        const heartEmojis = ['💖', '✨', '🎂', '🎈', '❤️', '🌟'];
+        for (let i = 0; i < 15; i++) {
+            const span = document.createElement('span');
+            span.className = 'bg-heart';
+            span.innerText = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+            span.style.left = Math.random() * 100 + '%';
+            span.style.fontSize = (Math.random() * 14 + 12) + 'px';
+            span.style.animationDuration = (Math.random() * 6 + 6) + 's';
+            span.style.animationDelay = (Math.random() * 5) + 's';
+            bgHeartsContainer.appendChild(span);
+        }
+
+        // --- WEB AUDIO SYNTHESIZER ---
+        let audioCtx = null;
+        let isAudioPlaying = false;
+        let audioInterval = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        const notes = [
+            261.63, 261.63, 293.66, 261.63, 349.23, 329.63, 
+            261.63, 261.63, 293.66, 261.63, 392.00, 349.23, 
+            261.63, 261.63, 523.25, 440.00, 349.23, 329.63, 293.66, 
+            466.16, 466.16, 440.00, 349.23, 392.00, 349.23  
+        ];
+
+        function playChime(freq = 523.25, type = 'sine', duration = 0.3) {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        function startMelodyLoop() {
+            if (isAudioPlaying) return;
+            isAudioPlaying = true;
+            document.getElementById('audio-toggle').innerText = '🔊';
+            let index = 0;
+            audioInterval = setInterval(() => {
+                if (!isAudioPlaying) return;
+                playChime(notes[index], 'triangle', 0.25);
+                index = (index + 1) % notes.length;
+            }, 300);
+        }
+
+        function stopMelodyLoop() {
+            isAudioPlaying = false;
+            clearInterval(audioInterval);
+            document.getElementById('audio-toggle').innerText = '🔇';
+        }
+
+        document.getElementById('audio-toggle').addEventListener('click', () => {
+            initAudio();
+            if (isAudioPlaying) {
+                stopMelodyLoop();
+            } else {
+                startMelodyLoop();
+            }
+        });
+
+        // --- STAGE NAVIGATION & DOTS ---
+        let currentStage = 1;
+        function goToStage(stageNum) {
+            document.querySelectorAll('.stage').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`stage-${stageNum}`).classList.remove('hidden');
+            currentStage = stageNum;
+
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, idx) => {
+                if (idx + 1 === stageNum) {
+                    dot.classList.remove('bg-white/30');
+                    dot.classList.add('bg-pink-400');
+                } else {
+                    dot.classList.remove('bg-pink-400');
+                    dot.classList.add('bg-white/30');
+                }
+            });
+
+            if (stageNum === 5) {
+                triggerConfettiBurst();
+            }
+        }
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            initAudio();
+            startMelodyLoop();
+            document.getElementById('start-modal').classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => document.getElementById('start-modal').remove(), 500);
+            initMicrophone();
+        });
+
+        // --- STAGE 1: CAKE & BLOW ---
+        let candlesRemaining = 5;
+        const flames = document.querySelectorAll('.flame');
+        const candleCountEl = document.getElementById('candle-count');
+
+        function blowOutCandle() {
+            if (candlesRemaining > 0) {
+                candlesRemaining--;
+                playChime(800 + candlesRemaining * 100, 'sine', 0.2);
+                const flameIndex = flames.length - 1 - candlesRemaining;
+                if (flames[flameIndex]) {
+                    flames[flameIndex].style.display = 'none';
+                }
+                candleCountEl.innerText = `Candles remaining: ${candlesRemaining}/5`;
+
+                if (candlesRemaining === 0) {
+                    candleCountEl.innerText = 'All candles blown out! 🎉';
+                    triggerConfettiBurst();
+                    setTimeout(() => goToStage(2), 1200);
+                }
+            }
+        }
+
+        document.getElementById('cake-container').addEventListener('click', blowOutCandle);
+
+        function initMicrophone() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                document.getElementById('mic-status').innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-400"></span><span>Tap to blow</span>';
+                return;
+            }
+            navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+                .then(stream => {
+                    const micAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const analyser = micAudioCtx.createAnalyser();
+                    const microphone = micAudioCtx.createMediaStreamSource(stream);
+                    microphone.connect(analyser);
+                    analyser.fftSize = 256;
+                    const bufferLength = analyser.frequencyBinCount;
+                    const dataArray = new Uint8Array(bufferLength);
+
+                    function checkVolume() {
+                        analyser.getByteFrequencyData(dataArray);
+                        let sum = 0;
+                        for (let i = 0; i < bufferLength; i++) {
+                            sum += dataArray[i];
+                        }
+                        let average = sum / bufferLength;
+                        if (average > 40 && candlesRemaining > 0) {
+                            blowOutCandle();
+                        }
+                        requestAnimationFrame(checkVolume);
+                    }
+                    checkVolume();
+                })
+                .catch(err => {
+                    document.getElementById('mic-status').innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-400"></span><span>Tap to blow</span>';
+                });
+        }
+
+        // --- STAGE 2: ENVELOPE ---
+        const envelope = document.getElementById('envelope');
+        let envelopeOpened = false;
+        envelope.addEventListener('click', () => {
+            if (!envelopeOpened) {
+                envelopeOpened = true;
+                envelope.classList.add('open');
+                playChime(600, 'sine', 0.4);
+                document.getElementById('next-stage-2').classList.remove('hidden');
+            }
+        });
+        document.getElementById('next-stage-2').addEventListener('click', () => goToStage(3));
+
+        // --- STAGE 3: MEMORY LANE (POLAROID STACK - PHOTO 1 TO 8) ---
+        const memories = [
+            { title: "Precious childhood moments 🍼", img: "photo1.jpg" },
+            { title: "Growing up with sweet smiles 🧸", img: "photo2.jpg" },
+            { title: "Such a cheerful little kid 📸", img: "photo3.jpg" },
+            { title: "School days and adventures 🎒", img: "photo4.jpg" },
+            { title: "In uniform and shining bright 🏫", img: "photo5.jpg" },
+            { title: "Milestones and growing up 👔", img: "photo6.jpg" },
+            { title: "Stylish moments & good vibes 😎", img: "photo7.jpg" },
+            { title: "Happy 21st Birthday Sarah! 🎂", img: "photo8.jpg" }
+        ];
+
+        const stackContainer = document.getElementById('polaroid-stack');
+        let currentPolaroidIndex = 0;
+
+        function renderPolaroids() {
+            stackContainer.innerHTML = '';
+            memories.forEach((mem, index) => {
+                if (index < currentPolaroidIndex) return;
+                const card = document.createElement('div');
+                card.className = `polaroid-card bg-white`;
+                card.style.zIndex = memories.length - index;
+                card.style.transform = `scale(${1 - (index - currentPolaroidIndex) * 0.04}) translateY(${(index - currentPolaroidIndex) * 8}px) rotate(${(index % 2 === 0 ? 1 : -1) * (index - currentPolaroidIndex) * 2}deg)`;
+                
+                card.innerHTML = `
+                    <div class="w-full h-56 bg-gray-100 rounded-lg overflow-hidden shadow-inner mb-3 flex items-center justify-center">
+                        <img src="${mem.img}" class="w-full h-full object-cover" alt="Sarah's Photo">
+                    </div>
+                    <span class="font-playfair text-sm font-bold text-gray-800 text-center">${mem.title}</span>
+                `;
+
+                function advancePhoto() {
+                    if (index !== currentPolaroidIndex) return;
+                    playChime(500, 'sine', 0.2);
+                    card.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+                    card.style.transform = 'translateX(400px) rotate(45deg)';
+                    card.style.opacity = '0';
+                    setTimeout(() => {
+                        currentPolaroidIndex++;
+                        document.getElementById('polaroid-counter').innerText = `Photo ${Math.min(currentPolaroidIndex + 1, memories.length)} / ${memories.length}`;
+                        if (currentPolaroidIndex >= memories.length) {
+                            setTimeout(() => goToStage(4), 400);
+                        } else {
+                            renderPolaroids();
+                        }
+                    }, 350);
+                }
+
+                card.addEventListener('click', advancePhoto);
+
+                let startX = 0, currentX = 0, isDragging = false;
+                card.addEventListener('pointerdown', (e) => {
+                    if (index !== currentPolaroidIndex) return;
+                    isDragging = true;
+                    startX = e.clientX;
+                    card.setPointerCapture(e.pointerId);
+                });
+                card.addEventListener('pointermove', (e) => {
+                    if (!isDragging) return;
+                    currentX = e.clientX - startX;
+                    card.style.transform = `translateX(${currentX}px) rotate(${currentX * 0.1}deg)`;
+                });
+                card.addEventListener('pointerup', (e) => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    if (Math.abs(currentX) > 70) {
+                        advancePhoto();
+                    } else {
+                        card.style.transform = `scale(1) translateY(0) rotate(0deg)`;
+                    }
+                });
+
+                stackContainer.appendChild(card);
+            });
+        }
+        renderPolaroids();
+
+        // --- STAGE 4: SCRATCH CARD ---
+        const canvas = document.getElementById('scratch-canvas');
+        const ctx = canvas.getContext('2d');
+        let isScratched = false;
+
+        function initScratchCard() {
+            ctx.fillStyle = '#d4af37';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#b8860b';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('✨ Scratch to Reveal ✨', canvas.width / 2, canvas.height / 2);
+            ctx.globalCompositeOperation = 'destination-out';
+        }
+        initScratchCard();
+
+        let totalPixels = canvas.width * canvas.height;
+
+        function scratch(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+            const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+
+            ctx.beginPath();
+            ctx.arc(x, y, 25, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (!isScratched) {
+                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                let transparentCount = 0;
+                for (let i = 3; i < imgData.data.length; i += 16) {
+                    if (imgData.data[i] === 0) transparentCount++;
+                }
+                const percent = (transparentCount / (totalPixels / 16)) * 100;
+                document.getElementById('scratch-progress').innerText = `Cleared: ${Math.min(Math.round(percent), 100)}%`;
+
+                if (percent > 40 && !isScratched) {
+                    isScratched = true;
+                    playChime(700, 'triangle', 0.4);
+                    triggerConfettiBurst();
+                    canvas.style.transition = 'opacity 0.6s ease';
+                    canvas.style.opacity = '0';
+                    setTimeout(() => goToStage(5), 800);
+                }
+            }
+        }
+
+        canvas.addEventListener('pointermove', (e) => {
+            if (e.buttons > 0 || e.pointerType === 'touch') scratch(e);
+        });
+
+        // --- STAGE 5: CONFETTI ---
+        function triggerConfettiBurst() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        document.getElementById('confetti-btn').addEventListener('click', () => {
+            playChime(880, 'sine', 0.3);
+            triggerConfettiBurst();
+        });
+    </script>
+</body>
+</html>
